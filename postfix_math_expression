@@ -1,0 +1,52 @@
+import pytest
+
+
+def conv_post(x):
+
+    pr = {'*': 2, '/': 2, '+': 1, '-': 1, '(': 0, ')': 0}
+
+    ls = x.split(' ')
+
+    out = ''
+    temp = []
+    print(ls)
+
+    for i in ls:
+        
+        if not i in pr.keys():
+            out += i
+        elif i == '(':
+            temp.append(i)
+        elif i == ')':
+            last_temp = temp[-1]
+            while last_temp != '(':
+                out += temp.pop()
+                last_temp = temp[-1]
+            temp.pop()
+        else:
+            try:
+                while pr[i] <= pr[temp[-1]]:
+                    out += temp.pop()
+            except IndexError:
+                pass
+            temp.append(i)
+        print(i, out, temp)
+    while temp:
+        out += temp.pop()
+
+    return out
+                    
+
+    
+
+def test_conv_post():
+
+    assert conv_post('A + B * C') == 'ABC*+'
+    assert conv_post('A * B + C') == 'AB*C+'
+    assert conv_post('A * B + C * D') == 'AB*CD*+'
+    assert conv_post('( A + B ) * C - ( D - E ) * ( F + G )') == 'AB+C*DE-FG+*-'
+
+
+print(conv_post('A + B * C'))
+print(conv_post('A * B + C'))
+print(conv_post('( A + B ) * C - ( D - E ) * ( F + G )'))
