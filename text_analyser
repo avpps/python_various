@@ -1,0 +1,77 @@
+path = 'C:\\repositories\\files\\zliczanie.txt'
+
+def analyse(path):
+
+    text = ''
+
+    with open(path, 'r', encoding='utf8') as text_file:
+        temp = ''
+        for line in text_file:
+            temp += line
+        temp = temp.split('\n')
+        for i in temp:
+            text += i
+
+        print(text)
+
+
+    pl_chr = ['A', 'Ą', 'B', 'C', 'Ć', 'D', 'E', 'Ę', 'F', 'G', 'H',
+              'I', 'J', 'K', 'L', 'Ł', 'M', 'N', 'Ń', 'O', 'Ó', 'P',
+              'R', 'S', 'Ś', 'T', 'U', 'W', 'Y', 'Z', 'Ź', 'Ż',
+              'a', 'ą', 'b', 'c', 'ć', 'd', 'e', 'ę', 'f', 'g', 'h',
+              'i', 'j', 'k', 'l', 'ł', 'm', 'n', 'ń', 'o', 'ó', 'p',
+              'r', 's', 'ś', 't', 'u', 'w', 'y', 'z', 'ź', 'ż']
+    allowed = ['', ' ', ',', '.', ':', ';', '"', "'", '!', '?']
+
+    pl_chr_dic = {key: None for key in pl_chr}
+    allowed_dic = {key: None for key in allowed}
+
+    print(allowed_dic)
+    print('' in allowed_dic)
+
+    words = 0
+    numbers = 0
+
+    forecast = None
+    last = ' '
+    valid = True
+    
+    for i in text:
+        #print('                 ','__{}__{}__'.format(last, i), bool(i))
+        if i in allowed_dic:
+            if valid:
+                print(last, i)
+                if forecast == 'w':
+                    words += 1
+                elif forecast == 'n':
+                    numbers += 1
+            else:
+                valid = True
+            forecast = None
+        elif i in pl_chr_dic:
+            if last in allowed_dic:
+                forecast = 'w'
+            elif last in pl_chr_dic:
+                forecast = 'w'
+            elif last == '-' and valid:
+                forecast = 'w'
+            else:
+                valid = False
+                pass
+        elif i.isdecimal():
+            if last in allowed_dic:
+                forecast = 'n'
+            elif last.isdecimal():
+                forecast = 'n'
+            elif last == ('+' or '-') and valid:
+                forecast = 'n'
+            else:
+                valid = False
+                pass        
+        last = i
+
+    print(numbers, words)
+
+analyse(path)
+    
+    
