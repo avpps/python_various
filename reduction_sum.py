@@ -1,3 +1,10 @@
+''' What will be sum of n first natural numbers if
+we remove firstly every k element of this list, 
+then every k-1 and etc. till k=2 inclusive?
+
+'''
+
+
 def oszcz(n=1000000, k=100):
     suma = n * (n + 1) / 2
     for i in range(k-1):
