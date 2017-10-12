@@ -1,0 +1,67 @@
+import pdb
+
+class Stack:
+
+    def __init__(self):
+        self.stack = []
+
+    def fill(self, n):
+        for i in range(n, 0, -1):
+            self.stack.append(Ring(i))
+
+    def append(self, item):
+        self.stack.append(item)
+
+    def pop(self):
+        return self.stack.pop(-1)
+
+    def empty(self):
+        return not bool(self.stack)
+
+    def top(self):
+        try:
+            return self.stack[-1].d
+        except IndexError:
+            return None
+
+
+class Ring:
+
+    def __init__(self, d):
+        self.d = d
+
+
+def move_hanoi_tower(n):
+    s_1 = Stack()
+    s_1.fill(5)
+    s_2 = Stack()
+    s_3 = Stack()
+
+    def m_act():
+        return {
+            s_1.top(): s_1,
+            s_2.top(): s_2,
+            s_3.top(): s_3,
+        }
+
+    def top_act(m):
+        return sorted([i for i in m.keys() if i], reverse=True)
+
+    while len(s_3.stack) != n:
+        m = m_act()
+        top = top_act(m)
+        just = False
+        for i in top:
+            if not just:
+                if s_3.top() is None:
+                    s_3.append(m_act(i).pop())
+                elif s_2.top() is None:
+                    s_2.append(m_act(i).pop())
+                elif
+                    
+                else:
+                    continue
+                just = True
+
+
+
