@@ -1,0 +1,50 @@
+def find_way_dr(path=None):
+    """Looking forward for way from matrix[0][0] to matrix[-1][-1],
+    which sum of passed matrix items will be lowest.
+    Possible are only right and down movements.    
+
+    Function demand path to txt file with digits-matrix separated with ','
+    eg:
+
+        1,2,3
+        4,5,6
+        7,8,9
+    
+    If no path, function will use builtin tiny demo matrix.
+    
+    """
+    
+    def idz(a_line=0, a_col=0):
+        try:
+            value = matrix[a_line][a_col]
+        except IndexError:
+            return False
+        if a_line == e_line and a_col == e_col:
+            cache[(a_line, a_col)] = matrix[a_line][a_col]
+            return matrix[a_line][a_col]
+        elif (a_line, a_col) in cache:
+            return cache[(a_line, a_col)]
+        else:
+            next_r = idz(a_line, a_col + 1)
+            next_d = idz(a_line + 1, a_col)
+            results = (i for i in (next_r, next_d) if i)
+            if results:
+                result = value + min(results)
+                cache[(a_line, a_col)] = result
+                return result
+    if path:
+        matrix = []
+        with open(path) as m_file:
+            for line in m_file:
+                tmp_l = line.replace('\n', '').split(',')
+                matrix.append(list(map(lambda x: int(x), tmp_l)))
+    else:
+        matrix = [[1, 30], [0, 7]]  
+
+    e_line = len(matrix) - 1
+    e_col = len(matrix[0]) - 1
+    cache = {}
+
+    idz()
+
+    return cache[(0, 0)]
