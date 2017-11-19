@@ -1,8 +1,27 @@
 class Base:
 
-    def __init__(self, name, value):
+    def __init__(self, name, value=None):
         self.name = name
         self.value = value
+
+
+class Tree(Base):
+
+    def __init__(self, name, value):
+        Base.__init__(self, name, value)
+        self._root = None
+
+    def set_root(self, root):
+        self._root = root
+
+    def get_root(self):
+        return self._root
+
+    def height(self):
+        if self._root:
+            return None
+        else:
+            return None
 
 
 class Node(Base):
@@ -44,6 +63,7 @@ class Edge(Base):
         return self._child_end
 
 
+tree_1 = Tree('tree_1', 10)
 start_point = Node('start_point', 10)
 mid_point_1 = Node('mid_point_1', 9)
 mid_point_2 = Node('mid_point_2', 8)
@@ -51,6 +71,7 @@ mid_point_3 = Node('mid_point_3', 7)
 mid_point_4 = Node('mid_point_4', 6)
 mid_point_5 = Node('mid_point_5', 5)
 
+tree_1.set_root(start_point)
 conn_1 = Edge('conn_1')
 start_point.set_child_edge(conn_1)
 conn_1.set_child_end(mid_point_1)
@@ -67,14 +88,4 @@ conn_5 = Edge('conn_5')
 mid_point_4.set_child_edge(conn_5)
 conn_5.set_child_end(mid_point_5)
 
-start_point.print_childs_names()
-
-myTree = [
-    'a',   # root
-    ['b',  # left subtree
-     ['d', [], []],
-    ['e', [], []] ],
-    ['c',  # right subtree
-    ['f', [], []],
-    [] ]
-    ]
+tree_1.
