@@ -20,17 +20,20 @@ FIGURES_ORDER = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'
 FIGURES = ''.join(FIGURES_ORDER)
 COLORS = 'HDCS'
 
+couple = lambda x: r'(([{f}])[{c}]\{p}[{c}])'.format(c='{c}', f='{f}', p=2+x)
+trio = lambda x: r'(([{f}])[{c}]\{p}[{c}]\{p}[{c}])'.format(c='{c}', f='{f}', p=2+x)
+
 schemes = [
-    ('poker_krolewski', r'A[{c}]K[{c}]Q[{c}]J[{c}]T[{c}]'),
-    ('poker', ''),
-    ('kareta', r'([{f}])[{c}]\1[{c}]\1[{c}]\1[{c}]'),
-    ('full', ''),
-    ('kolor', r'[{f}]([{c}])[{f}]\1[{f}]\1[{f}]\1[{f}]\1'),
-    ('street', 'FaNaNaNaNa'),
-    ('trojka', r'([{f}])[{c}]\1[{c}]\1[{c}]'),
-    ('dwie_pary', r'(([{f}])[{c}]\1[{c}]){{2}}'),
-    ('para', r'([{f}])[{c}]\1[{c}]'),
-    ('pusta', ''),
+    ('0_poker_krolewski', r'A[{c}]K[{c}]Q[{c}]J[{c}]T[{c}]'),
+    ('1_poker', ''),
+    ('2_kareta', r'([{f}])[{c}]\1[{c}]\1[{c}]\1[{c}]'),
+    ('3_full', r'({C0}{T1}|{T2}{C3})'.format(C0=couple(1), T1=trio(3), T2=trio(5), C3=couple(7))),
+    ('4_kolor', r'[{f}]([{c}])[{f}]\1[{f}]\1[{f}]\1[{f}]\1'),
+    ('5_street', ''),
+    ('6_trojka', trio(0)),
+    ('7_dwie_pary', couple(0)),
+    ('8_para', couple(0)),
+    ('9_pusta', ''),
 ]
 schemes_exp = [i[1].format(f=FIGURES, c=COLORS) for i in schemes]
 
@@ -43,13 +46,18 @@ def sort_hand(hand):
 def find_pattern(hand):
     hand_aggr = [None, None, None]
     for i, exp in enumerate(schemes_exp):
-        if i == 7: pdb.set_trace()
-        figure = re.search(exp, hand)
-        if figure and figure[0]:
-            print(figure)
-            hand_aggr[0] = i
-            hand_aggr[1] = figure[0]
-            break
+        # if i == 3: pdb.set_trace()
+        figure = re.findall(exp, hand)
+        if figure:
+            if i in [3, 7] and len(figure) == 2:
+                hand_aggr[0] = i
+                hand_aggr[1] = (figure[0][0], figure[1][0])
+                break
+            elif i not in [3, 7] and figure[0]:
+                print('figure:', figure)
+                hand_aggr[0] = i
+                hand_aggr[1] = figure[0]
+                break
     hand_aggr[2] = hand
 
     print('\n', hand_aggr)
@@ -75,32 +83,49 @@ def compare(player_1, player_2, result):
 
 
 def test_find_pattern():
+    pass
 
-    # assert find_pattern('AHKHQHJHTH')[0] == 0
-    # assert find_pattern('AHKDQCJSTH')[0] == 0
+    # poker_krolewski:
+    assert find_pattern('AHKHQHJHTH')[0] == 0
+    assert find_pattern('AHKDQCJSTH')[0] == 0
 
-    # assert find_pattern('') == 1
-    #
-    # assert find_pattern('AHADACASJS')[0] == 2
-    # assert find_pattern('AHJDJCJSJH')[0] == 2
-    #
-    # assert find_pattern('') == 3
-    #
-    # assert find_pattern('AHQHJHTH9H')[0] == 4
-    #
-    # assert find_pattern('')[0] == 5
-    #
-    # assert find_pattern('AHADAC2SJS')[0] == 6
-    # assert find_pattern('AHKDKCKHJS')[0] == 6
-    # assert find_pattern('AHADQCQHQS')[0] == 6
-    #
+    # poker:
+    # # assert find_pattern('') == 1
+
+    # kareta:
+    assert find_pattern('AHADACASJS')[0] == 2
+    assert find_pattern('AHJDJCJSJH')[0] == 2
+
+    # full:
+    # assert find_pattern('AHADAS2H2D')[0] == 3
+    # assert find_pattern('AHAD2S2H2D')[0] == 3
+
+    # kolor:
+    assert find_pattern('AHQHJHTH9H')[0] == 4
+
+    # street:
+    # # assert find_pattern('')[0] == 5
+
+    # trojka:
+    assert find_pattern('AHADAC2SJS')[0] == 6
+    assert find_pattern('AHKDKCKHJS')[0] == 6
+    assert find_pattern('AHADQCQHQS')[0] == 6
+
+    # dwie_pary:
     assert find_pattern('AHADKH2H2D')[0] == 7
-    #
-    # assert find_pattern('AHADKDKC2S')[0] == 8
-    # assert find_pattern('AHKDKDQC2S')[0] == 8
-    # assert find_pattern('AHKDJD3C3S')[0] == 8
-    # assert find_pattern('AHADJD3C3S')[0] == 8
-    #
+    assert find_pattern('AHADKDKC2S')[0] == 7
+
+    # para:
+    assert find_pattern('AHKDKDQC2S')[0] == 8
+    assert find_pattern('AHKDJD3C3S')[0] == 8
+    assert find_pattern('AHKDJD3C3S')[0] == 8
+
+    # pusta:
     # assert find_pattern('')[0] == 9
 
-# re.search('(?:.*)([AKQJT98765432])[HDCS]\\1[HDCS](?:.*)([AKQJT98765432])[HDCS]\\2[HDCS](?:.*)', 'AHADKH2H2D')
+
+
+
+
+
+
