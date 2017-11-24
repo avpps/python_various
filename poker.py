@@ -13,38 +13,47 @@ txt file with following structure:
 """
 
 import re
-import pdb
 
 PATH = 'C://repositories//files//poker.txt'
-FIGURES_ORDER = ['A', 'K', 'Q', 'J', 'T', '9', '8',
-                 '7', '6', '5', '4', '3', '2']
-FIGURES = ''.join(FIGURES_ORDER)
-COLORS = 'HDCS'
+figures_ordered = ['A', 'K', 'Q', 'J', 'T', '9', '8',
+                   '7', '6', '5', '4', '3', '2']
+figures = ''.join(figures_ordered)
+colors = 'HDCS'
 
-five_cards = [FIGURES[i:i+5] for i in range(len(FIGURES)-4)]
+five_cards_set = [figures[i:i + 5] for i in range(len(figures) - 4)]
 
-poker = r'(%s)' % '|'.join((''.join('[%s]' % j + ('([%s])' % COLORS if m == 0 else '\%d' % (n+2)) for m, j in enumerate(i))) for n, i in enumerate(five_cards))
-street = r'(%s)' % '|'.join((''.join(j + '[%s]' % COLORS for j in i)) for n, i in enumerate(five_cards))
-trio = lambda x: r'(([{f}])[{c}]\%d[{c}]\%d[{c}])' % (2+x, 2+x)
-couple = lambda x: r'(([{f}])[{c}]\%d[{c}])' % (2+x)
+c_ps = lambda x: r'(%s)' % '|'.join(x(n, i) for n, i in enumerate(five_cards_set))
+poker_d = lambda n, i: ''.join(
+    '[%s]' % j + (
+        '([%s])' % colors if m == 0 else '\%d' % (n + 2)
+    ) for m, j in enumerate(i))
+street_d = lambda n, i: ''.join(j + '[%s]' % colors for j in i)
+poker = c_ps(poker_d)
+street = c_ps(street_d)
+trio = lambda x: r'(([{f}])[{c}]\%d[{c}]\%d[{c}])' % (2 + x, 2 + x)
+couple = lambda x: r'(([{f}])[{c}]\%d[{c}])' % (2 + x)
 
 schemes = [
     ('0_poker_krolewski', r'(A([{c}])K\2Q\2J\2T\2)'),
     ('1_poker', poker),
     ('2_kareta', r'(([{f}])[{c}]\2[{c}]\2[{c}]\2[{c}])'),
-    ('3_full', r'(%s%s|%s%s)' % (couple(1), trio(3), trio(5), couple(7))),
+    ('3_full', r'(%s%s|%s%s)' % (
+        couple(1), trio(3), trio(5), couple(7)
+    )),
     ('4_kolor', r'([{f}]([{c}])[{f}]\2[{f}]\2[{f}]\2[{f}]\2)'),
     ('5_street', street),
     ('6_trojka', trio(0)),
-    ('7_dwie_pary', '((?<=[{f}][{c}])%s%s|%s[{f}][{c}]%s|%s%s(?=[{f}][{c}]))' % (couple(1), couple(3), couple(5), couple(7), couple(9), couple(11))),
+    ('7_dwie_pary', '((?<=[{f}][{c}])%s%s|%s[{f}][{c}]%s|%s%s(?=[{f}][{c}]))' % (
+        couple(1), couple(3), couple(5), couple(7), couple(9), couple(11)
+    )),
     ('8_para', couple(0)),
     ('9_pusta', ''),
 ]
-schemes_exp = [i[1].format(f=FIGURES, c=COLORS) for i in schemes]
+schemes_exp = [i[1].format(f=figures, c=colors) for i in schemes]
 
 
 def sort_hand(hand):
-    hand_sorted = sorted(hand, key=lambda x: FIGURES_ORDER.index(x[0]))
+    hand_sorted = sorted(hand, key=lambda x: figures_ordered.index(x[0]))
     return ''.join(hand_sorted)
 
 
@@ -64,7 +73,6 @@ def find_pattern(hand):
     print(hand_aggr)
     return hand_aggr
 
-remisy = [0]
 
 def compare(hand_1, hand_2, result):
     if hand_1[0] < hand_2[0]:
@@ -76,31 +84,30 @@ def compare(hand_1, hand_2, result):
     elif hand_1[0] == hand_2[0]:
         if hand_1[0] == 9:
             for i, j in zip(hand_1[2][::2], hand_2[2][::2]):
-                if FIGURES_ORDER.index(i) < FIGURES_ORDER.index((j)):
+                if figures_ordered.index(i) < figures_ordered.index(j):
                     result['gracz_1'] += 1
                     return result
-                elif FIGURES_ORDER.index(i) > FIGURES_ORDER.index((j)):
+                elif figures_ordered.index(i) > figures_ordered.index(j):
                     result['gracz_2'] += 1
                     return result
             else:
                 return result
         else:
-            if FIGURES_ORDER.index(hand_1[1][0]) < FIGURES_ORDER.index(hand_2[1][0]):
+            if figures_ordered.index(hand_1[1][0]) < figures_ordered.index(hand_2[1][0]):
                 result['gracz_1'] += 1
                 return result
-            elif FIGURES_ORDER.index(hand_1[1][0]) > FIGURES_ORDER.index(hand_2[1][0]):
+            elif figures_ordered.index(hand_1[1][0]) > figures_ordered.index(hand_2[1][0]):
                 result['gracz_2'] += 1
                 return result
             else:
                 for i, j in zip(hand_1[2][::2], hand_2[2][::2]):
-                    if FIGURES_ORDER.index(i) < FIGURES_ORDER.index((j)):
+                    if figures_ordered.index(i) < figures_ordered.index(j):
                         result['gracz_1'] += 1
                         return result
-                    elif FIGURES_ORDER.index(i) > FIGURES_ORDER.index((j)):
+                    elif figures_ordered.index(i) > figures_ordered.index(j):
                         result['gracz_2'] += 1
                         return result
                 else:
-                    remisy[0] += 1
                     return result
 
     result_updated = result
@@ -116,16 +123,15 @@ with open(PATH) as file:
         hand_2 = find_pattern(sort_hand(hands[5:]))
         result = compare(hand_1, hand_2, result)
 
-print('\n\n', result, remisy)
+print('\n\n', result)
 
 
 def test_find_pattern():
-    pass
 
     # poker_krolewski:
     assert find_pattern('AHKHQHJHTH')[0] == 0
 
-    # # poker:
+    # poker:
     assert find_pattern('KHQHJHTH9H')[0] == 1
 
     # kareta:
@@ -162,22 +168,17 @@ def test_find_pattern():
 
 
 def test_compare():
+
     result = {'gracz_1': 0, 'gracz_2': 0}
 
-    resp = compare([3, 'AHADAS2H2D', 'AHADAS2H2D'], [4, 'AHQHJHTH9H', 'AHQHJHTH9H'], result)
+    resp = compare([3, 'AHADAS2H2D', 'AHADAS2H2D'], [4, 'AHQHJHTH9H', 'AHQHJHTH9H'], result.copy())
     assert resp == {'gracz_1': 1, 'gracz_2': 0}
 
-    result = {'gracz_1': 0, 'gracz_2': 0}
-
-    resp = compare([9, '', 'ASKDJD8H3D'], [9, '', 'QD8C7C6C5C'], result)
+    resp = compare([9, '', 'ASKDJD8H3D'], [9, '', 'QD8C7C6C5C'], result.copy())
     assert resp == {'gracz_1': 1, 'gracz_2': 0}
 
-    result = {'gracz_1': 0, 'gracz_2': 0}
-
-    resp = compare([3, 'AHADAS2H2D', 'AHADAS2H2D'], [3, 'KHKD2S2H2D', 'KHKD2S2H2D'], result)
+    resp = compare([3, 'AHADAS2H2D', 'AHADAS2H2D'], [3, 'KHKD2S2H2D', 'KHKD2S2H2D'], result.copy())
     assert resp == {'gracz_1': 1, 'gracz_2': 0}
 
-    result = {'gracz_1': 0, 'gracz_2': 0}
-
-    resp = compare([8, 'AHKDJS2H2D', 'KHQD5S2H2D'], [8, 'KHKD2S2H2D', 'KHKD2S2H2D'], result)
+    resp = compare([8, 'AHKDJS2H2D', 'KHQD5S2H2D'], [8, 'KHKD2S2H2D', 'KHKD2S2H2D'], result.copy())
     assert resp == {'gracz_1': 1, 'gracz_2': 0}
