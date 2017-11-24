@@ -21,16 +21,19 @@ figures = ''.join(figures_ordered)
 colors = 'HDCS'
 
 five_cards_set = [figures[i:i + 5] for i in range(len(figures) - 4)]
-
 c_ps = lambda x: r'(%s)' % '|'.join(x(n, i) for n, i in enumerate(five_cards_set))
+
 poker_d = lambda n, i: ''.join(
     '[%s]' % j + (
         '([%s])' % colors if m == 0 else '\%d' % (n + 2)
     ) for m, j in enumerate(i))
-street_d = lambda n, i: ''.join(j + '[%s]' % colors for j in i)
 poker = c_ps(poker_d)
+
+street_d = lambda n, i: ''.join(j + '[%s]' % colors for j in i)
 street = c_ps(street_d)
+
 trio = lambda x: r'(([{f}])[{c}]\%d[{c}]\%d[{c}])' % (2 + x, 2 + x)
+
 couple = lambda x: r'(([{f}])[{c}]\%d[{c}])' % (2 + x)
 
 schemes = [
