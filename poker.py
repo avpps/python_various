@@ -21,20 +21,31 @@ figures = ''.join(figures_ordered)
 colors = 'HDCS'
 
 five_cards_set = [figures[i:i + 5] for i in range(len(figures) - 4)]
-c_ps = lambda x: r'(%s)' % '|'.join(x(n, i) for n, i in enumerate(five_cards_set))
 
-poker_d = lambda n, i: ''.join(
-    '[%s]' % j + (
-        '([%s])' % colors if m == 0 else '\%d' % (n + 2)
+
+def c_ps(x):
+    return r'(%s)' % '|'.join(x(n, i) for n, i in enumerate(five_cards_set))
+
+
+@c_ps
+def poker(n, i):
+    return ''.join(
+        '[%s]' % j + ('([%s])' % colors if m == 0 else '\%d' % (n + 2)
     ) for m, j in enumerate(i))
-poker = c_ps(poker_d)
 
-street_d = lambda n, i: ''.join(j + '[%s]' % colors for j in i)
-street = c_ps(street_d)
 
-trio = lambda x: r'(([{f}])[{c}]\%d[{c}]\%d[{c}])' % (2 + x, 2 + x)
+@c_ps
+def street(n, i):
+    return ''.join(j + '[%s]' % colors for j in i)
 
-couple = lambda x: r'(([{f}])[{c}]\%d[{c}])' % (2 + x)
+
+def trio(x):
+    return r'(([{f}])[{c}]\%d[{c}]\%d[{c}])' % (2 + x, 2 + x)
+
+
+def couple(x):
+    return r'(([{f}])[{c}]\%d[{c}])' % (2 + x)
+
 
 schemes = [
     ('0_poker_krolewski', r'(A([{c}])K\2Q\2J\2T\2)'),
@@ -73,48 +84,43 @@ def find_pattern(hand):
             break
 
     hand_aggr[2] = hand
-    print(hand_aggr)
     return hand_aggr
 
 
 def compare(hand_1, hand_2, result):
-    if hand_1[0] < hand_2[0]:
-        result['gracz_1'] += 1
-        return result
-    elif hand_1[0] > hand_2[0]:
-        result['gracz_2'] += 1
-        return result
-    elif hand_1[0] == hand_2[0]:
-        if hand_1[0] == 9:
-            for i, j in zip(hand_1[2][::2], hand_2[2][::2]):
-                if figures_ordered.index(i) < figures_ordered.index(j):
-                    result['gracz_1'] += 1
-                    return result
-                elif figures_ordered.index(i) > figures_ordered.index(j):
-                    result['gracz_2'] += 1
-                    return result
-            else:
-                return result
-        else:
-            if figures_ordered.index(hand_1[1][0]) < figures_ordered.index(hand_2[1][0]):
-                result['gracz_1'] += 1
-                return result
-            elif figures_ordered.index(hand_1[1][0]) > figures_ordered.index(hand_2[1][0]):
-                result['gracz_2'] += 1
-                return result
-            else:
-                for i, j in zip(hand_1[2][::2], hand_2[2][::2]):
-                    if figures_ordered.index(i) < figures_ordered.index(j):
-                        result['gracz_1'] += 1
-                        return result
-                    elif figures_ordered.index(i) > figures_ordered.index(j):
-                        result['gracz_2'] += 1
-                        return result
-                else:
-                    return result
 
-    result_updated = result
-    return result_updated
+    def check_all():
+        for i, j in zip(hand_1[2][::2], hand_2[2][::2]):
+            i_ord = figures_ordered.index(i)
+            j_ord = figures_ordered.index(j)
+            if i_ord < j_ord:
+                result['gracz_1'] += 1
+                break
+            elif i_ord > j_ord:
+                result['gracz_2'] += 1
+                break
+
+    h_1_0 = hand_1[0]
+    h_2_0 = hand_2[0]
+    if h_1_0 < h_2_0:
+        result['gracz_1'] += 1
+    elif h_1_0 > h_2_0:
+        result['gracz_2'] += 1
+    elif h_1_0 == h_2_0:
+        if h_1_0 == 9:
+            check_all()
+
+        else:
+            h_1_1_0_o = figures_ordered.index(hand_1[1][0])
+            h_2_1_0_o = figures_ordered.index(hand_2[1][0])
+            if h_1_1_0_o < h_2_1_0_o:
+                result['gracz_1'] += 1
+            elif h_1_1_0_o > h_2_1_0_o:
+                result['gracz_2'] += 1
+            else:
+                check_all
+    print(result, hand_1, hand_2)
+    return result
 
 
 result = {'gracz_1': 0, 'gracz_2': 0}
@@ -173,15 +179,32 @@ def test_find_pattern():
 def test_compare():
 
     result = {'gracz_1': 0, 'gracz_2': 0}
+    desired_resp = {'gracz_1': 1, 'gracz_2': 0}
 
-    resp = compare([3, 'AHADAS2H2D', 'AHADAS2H2D'], [4, 'AHQHJHTH9H', 'AHQHJHTH9H'], result.copy())
-    assert resp == {'gracz_1': 1, 'gracz_2': 0}
+    resp = compare(
+        [3, 'AHADAS2H2D', 'AHADAS2H2D'],
+        [4, 'AHQHJHTH9H', 'AHQHJHTH9H'],
+        result.copy()
+    )
+    assert resp == desired_resp
 
-    resp = compare([9, '', 'ASKDJD8H3D'], [9, '', 'QD8C7C6C5C'], result.copy())
-    assert resp == {'gracz_1': 1, 'gracz_2': 0}
+    resp = compare(
+        [9, '', 'ASKDJD8H3D'],
+        [9, '', 'QD8C7C6C5C'],
+        result.copy()
+    )
+    assert resp == desired_resp
 
-    resp = compare([3, 'AHADAS2H2D', 'AHADAS2H2D'], [3, 'KHKD2S2H2D', 'KHKD2S2H2D'], result.copy())
-    assert resp == {'gracz_1': 1, 'gracz_2': 0}
+    resp = compare(
+        [3, 'AHADAS2H2D', 'AHADAS2H2D'],
+        [3, 'KHKD2S2H2D', 'KHKD2S2H2D'],
+        result.copy()
+    )
+    assert resp == desired_resp
 
-    resp = compare([8, 'AHKDJS2H2D', 'KHQD5S2H2D'], [8, 'KHKD2S2H2D', 'KHKD2S2H2D'], result.copy())
-    assert resp == {'gracz_1': 1, 'gracz_2': 0}
+    resp = compare(
+        [8, 'AHKDJS2H2D', 'KHQD5S2H2D'],
+        [8, 'KHKD2S2H2D', 'KHKD2S2H2D'],
+        result.copy()
+    )
+    assert resp == desired_resp
