@@ -27,11 +27,22 @@ def c_ps(x):
     return r'(%s)' % '|'.join(x(n, i) for n, i in enumerate(five_cards_set))
 
 
+def poker_krolewski():
+    return r'(A([{c}])K\2Q\2J\2T\2)'
+
 @c_ps
 def poker(n, i):
-    return ''.join(
-        '[%s]' % j + ('([%s])' % colors if m == 0 else '\%d' % (n + 2)
+    return ''.join('[%s]' % j + (
+        '([%s])' % colors if m == 0 else '\%d' % (n + 2)
     ) for m, j in enumerate(i))
+
+
+def kareta():
+    return r'(([{f}])[{c}]\2[{c}]\2[{c}]\2[{c}])'
+
+
+def kolor():
+    return r'([{f}]([{c}])[{f}]\2[{f}]\2[{f}]\2[{f}]\2)'
 
 
 @c_ps
@@ -47,19 +58,27 @@ def couple(x):
     return r'(([{f}])[{c}]\%d[{c}])' % (2 + x)
 
 
-schemes = [
-    ('0_poker_krolewski', r'(A([{c}])K\2Q\2J\2T\2)'),
-    ('1_poker', poker),
-    ('2_kareta', r'(([{f}])[{c}]\2[{c}]\2[{c}]\2[{c}])'),
-    ('3_full', r'(%s%s|%s%s)' % (
+def couple_couples():
+    return r'((?<=[{f}][{c}])%s%s|%s[{f}][{c}]%s|%s%s(?=[{f}][{c}]))' % (
+        couple(1), couple(3), couple(5), couple(7), couple(9), couple(11)
+    )
+
+
+def full():
+    return r'(%s%s|%s%s)' % (
         couple(1), trio(3), trio(5), couple(7)
-    )),
-    ('4_kolor', r'([{f}]([{c}])[{f}]\2[{f}]\2[{f}]\2[{f}]\2)'),
+    )
+
+
+schemes = [
+    ('0_poker_krolewski', poker_krolewski()),
+    ('1_poker', poker),
+    ('2_kareta', kareta()),
+    ('3_full', full()),
+    ('4_kolor', kolor()),
     ('5_street', street),
     ('6_trojka', trio(0)),
-    ('7_dwie_pary', '((?<=[{f}][{c}])%s%s|%s[{f}][{c}]%s|%s%s(?=[{f}][{c}]))' % (
-        couple(1), couple(3), couple(5), couple(7), couple(9), couple(11)
-    )),
+    ('7_dwie_pary', couple_couples()),
     ('8_para', couple(0)),
     ('9_pusta', ''),
 ]
@@ -109,7 +128,6 @@ def compare(hand_1, hand_2, result):
     elif h_1_0 == h_2_0:
         if h_1_0 == 9:
             check_all()
-
         else:
             h_1_1_0_o = figures_ordered.index(hand_1[1][0])
             h_2_1_0_o = figures_ordered.index(hand_2[1][0])
