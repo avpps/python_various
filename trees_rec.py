@@ -1,10 +1,28 @@
+import re
+
 class BinaryTree:
 
-    def __init__(self, root_obj=None):
+    def __init__(
+            self, root_obj=None, root=None,
+            left_child=None, right_child=None
+    ):
         self._key = root_obj
-        self._left_child = None
-        self._right_child = None
-        self._root = None
+        self._left_child = left_child
+        self._right_child = right_child
+        self._root = root
+
+    @classmethod
+    def from_exp(cls, exp):
+        regexp = [
+            r'[0-9]+[.][0-9]*(?=[+\-*/])|[0-9]+(?=[+\-*/])',
+            r'[+\-*/]',
+            r'(?<=[+\-*/])[0-9]+[.][0-9]*|(?<=[+\-*/])[0-9]+'
+        ]
+        return cls(
+            left_child=re.search(regexp[0], exp).group(),
+            root_obj=re.search(regexp[1], exp).group(),
+            right_child=re.search(regexp[2], exp).group(),
+        )
 
     @property
     def key(self):
@@ -59,6 +77,33 @@ class BinaryTree:
             exp += self.right_child.print_exp
         exp += ')'
         return exp
+
+
+def preorder(tree):
+    if isinstance(tree, BinaryTree):
+        print(tree.key)
+        preorder(tree.left_child)
+        preorder(tree.right_child)
+    else:
+        print(tree)
+
+
+def inorder(tree):
+    if isinstance(tree, BinaryTree):
+        inorder(tree.left_child)
+        print(tree.key)
+        inorder(tree.right_child)
+    else:
+        print(tree)
+
+
+def postorder(tree):
+    if isinstance(tree, BinaryTree):
+        postorder(tree.left_child)
+        postorder(tree.right_child)
+        print(tree.key)
+    else:
+        print(tree)
 
 
 def prepare_expression(exp):
@@ -117,3 +162,23 @@ print('')
 
 print(exp_tree.print_exp)
 print(eval(exp_tree.print_exp))
+
+print('\n\n')
+
+print('preorder:\n')
+preorder(exp_tree)
+print('\n\n')
+
+print('inorder:\n')
+inorder(exp_tree)
+print('\n\n')
+
+print('postorder:\n')
+postorder(exp_tree)
+print('\n\n')
+
+print('classmethod_test')
+classmethod_test = BinaryTree.from_exp('1.2+0.56')
+print(classmethod_test.left_child)
+print(classmethod_test.key)
+print(classmethod_test.right_child)
