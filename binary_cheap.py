@@ -7,7 +7,8 @@ allow us both enqueue and dequeue items in O(logn).
 class BinaryHeap:
 
     def __init__(self, heap=None):
-        self._heap = self.build_heap(heap)
+        self._heap = [None]
+        self.build_heap(heap)
         self._size = 0
 
     @property
@@ -24,9 +25,8 @@ class BinaryHeap:
 
     def build_heap(self, heap):
         if heap:
-            return [None] + heap
-        else:
-            return [None]
+            for i in heap:
+                self.insert(i)
 
     def insert(self, value):
         self._heap.append(value)
@@ -78,8 +78,37 @@ def test_binary_heap_insert():
     heap.insert(value=0)
     assert heap.heap == [0, 1, 2, 4, 5, 6, 7]
 
+
 def test_binary_heap_del_min():
 
     heap = BinaryHeap(heap=[1, 2, 3, 3])
     heap.del_min()
     assert heap.heap == [2, 3, 3]
+
+
+def test_binary_heap_build_heap():
+
+    import random
+    import math
+
+    list_for_heap = random.sample(range(1, 6), 5)
+    print(list_for_heap)
+    heap = BinaryHeap()
+    heap.build_heap(list_for_heap)
+
+    r_l = len(heap.heap)
+    prev = 0
+    act = 1
+    print(heap.heap, heap._heap)
+    while act < r_l:
+        dist = ' ' * ((r_l - act) // (act+1))
+        res = ''
+        for i in range(prev, act+1):
+            res += dist
+            res += '%4d' % heap.heap[i]
+        print(res, '\n')
+        prev, act = act, act*2
+
+    # assert heap.heap == sorted(list_for_heap)
+
+test_binary_heap_build_heap()
